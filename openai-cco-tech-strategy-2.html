@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI CCO Tech Strategy</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        // Inline SVG Icons
+        const Search = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path>
+            </svg>
+        );
+        const ChevronDown = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        );
+        const ChevronRight = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        );
+        const Users = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        );
+        const Target = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+        );
+        const Lightbulb = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d="M9 18h6"></path><path d="M10 22h4"></path>
+                <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1.33.64 2.5 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path>
+            </svg>
+        );
+        const CheckCircle2 = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                <path d="m9 12 2 2 4-4"></path>
+            </svg>
+        );
+        const Shield = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+        );
+        const Code = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+            </svg>
+        );
+        const Copy = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+        );
+        const Check = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        );
+        const ExternalLink = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+        );
+
+        const OpenAICCODashboard = () => {
+          const [selectedIndustry, setSelectedIndustry] = useState(null);
+          const [expandedUseCase, setExpandedUseCase] = useState(null);
+          const [searchTerm, setSearchTerm] = useState('');
+          const [copiedText, setCopiedText] = useState(null);
+
+          const gtmData = {
+            techSoftware: {
+              name: 'Tech & Software',
+              color: 'cyan',
+              description: 'Developers, SaaS Apps, Platform Integrations',
+              keyConsiderations: [
+                'GitHub Copilot and Codex for autonomous development',
+                'Enterprise-grade API reliability for production apps',
+                'Unlimited ChatGPT Enterprise for developer productivity',
+                'Multimodal capabilities (text, image, audio, vision)'
+              ],
+              useCases: [
+                {
+                  id: 'tech-1',
+                  name: 'Accelerated Software Development with Codex',
+                  shortPitch: 'Cloud-based AI coding agent for parallel task execution',
+                  problemSolved: 'Engineering teams face bottlenecks in code review, testing, debugging, and repetitive implementation tasks. Traditional development workflows slow feature delivery and limit engineering velocity.',
+                  howUsed: [
+                    'Deploy Codex to write features, fix bugs, and propose pull requests autonomously',
+                    'Run multiple coding tasks in parallel cloud sandboxes preloaded with repositories',
+                    'Accelerate test coverage generation and integration failure resolution',
+                    'Automate refactoring, migrations, and large-scale code updates'
+                  ],
+                  whyOpenAI: [
+                    'Codex powered by o3 model optimized specifically for software engineering',
+                    'Multi-hour sustained reasoning enables complex, multi-step development tasks',
+                    'Real-time pairing in IDE plus task delegation for longer workflows',
+                    'Proven with companies like Cisco, Temporal, and Superhuman',
+                    'Enterprise-grade reliability for production development environments'
+                  ],
+                  buyerPersonas: [
+                    { title: 'VP of Engineering / CTO', level: 'C-Suite/VP', technical: true },
+                    { title: 'Engineering Managers', level: 'Director/Manager', technical: true },
+                    { title: 'Platform Engineering Leads', level: 'IC/Lead', technical: true }
+                  ],
+                  gtmScenario: '"A Series B SaaS company deploys Codex for their 50-person engineering team. Developers delegate routine feature implementation and bug fixes to Codex agents running in cloud sandboxes. Engineering velocity increases 40% as developers focus on architecture and product decisions while Codex handles implementation details. Test coverage improves from 60% to 85%."',
+                  keyMetrics: '40% faster feature delivery; 25% improvement in test coverage; 3 hours/week saved per engineer',
+                  competitiveEdge: 'Only AI coding platform combining real-time IDE pairing with autonomous cloud-based task delegation at enterprise scale'
+                },
+                {
+                  id: 'tech-2',
+                  name: 'API Platform for Custom AI Applications',
+                  shortPitch: 'Build AI-powered products with frontier models via API',
+                  problemSolved: 'Companies building AI-powered products need reliable, scalable access to frontier models with multimodal capabilities (text, image, audio, vision). Building models in-house is prohibitively expensive.',
+                  howUsed: [
+                    'Integrate GPT-5, GPT-5 mini, or GPT-5 nano via API for customer-facing features',
+                    'Deploy models with extended thinking capabilities for complex reasoning tasks',
+                    'Use multimodal inputs (text, image, audio, vision) for richer applications',
+                    'Fine-tune models on domain-specific data for specialized performance'
+                  ],
+                  whyOpenAI: [
+                    'Access to most advanced frontier models (GPT-5 family) at competitive pricing',
+                    'Enterprise-grade reliability and uptime for production applications',
+                    'No customer data used in training pipeline - data sovereignty guaranteed',
+                    'Flexible pricing tiers (o3, o3-mini, o3-nano) for different use cases',
+                    'Multimodal capabilities enable richer product experiences'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Chief Product Officer', level: 'C-Suite', technical: false },
+                    { title: 'Head of AI/ML', level: 'VP/Director', technical: true },
+                    { title: 'Product Engineering Leads', level: 'Director/Manager', technical: true }
+                  ],
+                  gtmScenario: '"An ed-tech startup builds adaptive learning software using OpenAI\'s API. They use GPT-5 for natural language tutoring, vision capabilities for analyzing student-drawn diagrams, and reasoning models for complex math problem explanations. The product serves 500K students with 99.9% uptime. Fine-tuning on educational content improves subject accuracy by 35%."',
+                  keyMetrics: '99.9% API uptime; 35% accuracy improvement via fine-tuning; Support for 500K+ users',
+                  competitiveEdge: 'Most advanced reasoning capabilities in production, with proven enterprise reliability and multimodal support'
+                },
+                {
+                  id: 'tech-3',
+                  name: 'Developer Productivity via ChatGPT Enterprise',
+                  shortPitch: 'Unlimited AI assistance for engineering teams with enterprise security',
+                  problemSolved: 'Engineering teams need AI for debugging, code review, documentation, and research but face API cost unpredictability, security concerns, and lack of context awareness with consumer tools.',
+                  howUsed: [
+                    'Provide unlimited ChatGPT Enterprise access to all developers',
+                    'Connect to GitHub, Slack, and internal documentation via integrations',
+                    'Use for debugging, rubber-ducking, porting code between languages',
+                    'Generate documentation, analyze requirements, and prototype features'
+                  ],
+                  whyOpenAI: [
+                    'Unlimited usage with no per-query costs - predictable enterprise pricing',
+                    'Enterprise-grade security with SOC 2, encryption, and admin controls',
+                    'Integrations with developer tools (GitHub, etc.) for contextual assistance',
+                    'No customer data used for model training',
+                    'Custom GPTs encode company-specific development practices'
+                  ],
+                  buyerPersonas: [
+                    { title: 'CTO / VP of Engineering', level: 'C-Suite/VP', technical: true },
+                    { title: 'Developer Experience Teams', level: 'Director/Manager', technical: true },
+                    { title: 'Engineering Operations Leads', level: 'Director', technical: true }
+                  ],
+                  gtmScenario: '"A fintech company provides ChatGPT Enterprise to 200 engineers. Developers use it for debugging complex distributed systems, generating API documentation, and learning unfamiliar codebases during onboarding. Average onboarding time drops from 6 weeks to 3.5 weeks. Engineering team reports 4 hours/week productivity gains per developer."',
+                  keyMetrics: '40% faster onboarding; 4 hours/week saved per engineer; 100% adoption across engineering',
+                  competitiveEdge: 'Enterprise-grade unlimited AI access with native integrations to developer workflows and guaranteed data privacy'
+                }
+              ]
+            },
+            financeFintech: {
+              name: 'Finance & Fintech',
+              color: 'blue',
+              description: 'Banks, Investment Firms, Fintech Startups',
+              keyConsiderations: [
+                'Proven deployments at Morgan Stanley and JP Morgan Chase',
+                'Enterprise security meets financial services compliance',
+                'Real-time fraud detection and risk management',
+                'Automated regulatory compliance and reporting'
+              ],
+              useCases: [
+                {
+                  id: 'fin-1',
+                  name: 'Investment Research & Analysis Automation',
+                  shortPitch: 'AI-powered research synthesis and market analysis',
+                  problemSolved: 'Investment teams spend excessive time synthesizing research, analyzing earnings reports, and monitoring market data. Manual research limits coverage breadth and reaction speed to market events.',
+                  howUsed: [
+                    'Analyze earnings reports, 10-Ks, and research documents at scale',
+                    'Run Monte Carlo simulations and financial models for risk assessment',
+                    'Synthesize market data and generate investment thesis summaries',
+                    'Connect to market data feeds and research repositories via integrations'
+                  ],
+                  whyOpenAI: [
+                    'Models excel in data-rich, complex financial analysis environments',
+                    'Deep Research mode for comprehensive multi-source analysis',
+                    'Reasoning models (o3) for multi-step financial logic',
+                    'Used by Morgan Stanley for personalized wealth management',
+                    'Enterprise integrations with Bloomberg, FactSet, and market data providers'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Portfolio Managers', level: 'VP/Director', technical: false },
+                    { title: 'Research Analysts', level: 'IC/Manager', technical: true },
+                    { title: 'Chief Investment Officer', level: 'C-Suite', technical: false }
+                  ],
+                  gtmScenario: '"A mid-size asset manager uses ChatGPT Enterprise with market data integrations to analyze 200+ companies per quarter. Analysts use o3 reasoning models for complex scenario modeling and risk assessment. Research coverage expands 3x while maintaining quality. Portfolio managers make faster, more informed decisions during earnings season."',
+                  keyMetrics: '3x research coverage expansion; 50% faster earnings analysis; 20% improvement in risk-adjusted returns',
+                  competitiveEdge: 'Deep reasoning capabilities combined with enterprise data integrations enable institutional-grade analysis at speed'
+                },
+                {
+                  id: 'fin-2',
+                  name: 'Regulatory Compliance & Risk Management',
+                  shortPitch: 'Automated compliance monitoring and regulatory analysis',
+                  problemSolved: 'Financial institutions face overwhelming regulatory documentation, complex compliance requirements, and need for real-time fraud detection. Manual processes are slow, error-prone, and don\'t scale.',
+                  howUsed: [
+                    'Monitor and analyze regulatory updates across multiple jurisdictions',
+                    'Automate compliance documentation and reporting workflows',
+                    'Detect fraud patterns in transaction data using AI analysis',
+                    'Generate audit trails and compliance summaries for regulators'
+                  ],
+                  whyOpenAI: [
+                    'Used by JP Morgan Chase for real-time fraud detection',
+                    'Processes vast regulatory documentation with high accuracy',
+                    'Enterprise security meets financial services compliance standards',
+                    'Integrates with existing risk management systems',
+                    'Reasoning models handle complex multi-jurisdiction compliance logic'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Chief Compliance Officer', level: 'C-Suite', technical: false },
+                    { title: 'Risk Management Directors', level: 'VP/Director', technical: false },
+                    { title: 'Regulatory Affairs Teams', level: 'Manager', technical: true }
+                  ],
+                  gtmScenario: '"A regional bank deploys ChatGPT Enterprise for compliance monitoring across 15 regulatory frameworks. Compliance team uses it to analyze new regulations, update internal policies, and generate quarterly compliance reports. Fraud detection models identify 35% more suspicious transactions. Regulatory reporting time reduced from 2 weeks to 3 days."',
+                  keyMetrics: '35% improvement in fraud detection; 80% faster regulatory reporting; 100% audit trail coverage',
+                  competitiveEdge: 'Only frontier AI with proven deployment in major financial institutions for mission-critical compliance'
+                },
+                {
+                  id: 'fin-3',
+                  name: 'Client Advisory & Wealth Management',
+                  shortPitch: 'Personalized financial advice and client communication',
+                  problemSolved: 'Wealth advisors need to provide personalized advice to hundreds of clients, stay current on market conditions, and communicate complex financial concepts clearly. Manual research and communication limits client service quality.',
+                  howUsed: [
+                    'Generate personalized investment recommendations based on client goals',
+                    'Create client-ready summaries of portfolio performance and market conditions',
+                    'Draft compliant client communications and educational materials',
+                    'Analyze client preferences and financial goals through natural dialogue'
+                  ],
+                  whyOpenAI: [
+                    'Morgan Stanley deployed for personalized wealth management at scale',
+                    'Models adjust recommendations dynamically based on market data',
+                    'Enterprise compliance ensures all advice meets regulatory standards',
+                    'Natural language capabilities improve client understanding',
+                    'Custom GPTs encode firm-specific investment philosophies'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Wealth Management Advisors', level: 'IC/Manager', technical: false },
+                    { title: 'Head of Wealth Management', level: 'VP/Director', technical: false },
+                    { title: 'Client Relationship Managers', level: 'Manager', technical: false }
+                  ],
+                  gtmScenario: '"A wealth management firm provides ChatGPT Enterprise to 500 advisors. Advisors use it to generate personalized quarterly reviews, market outlook summaries, and investment recommendations. Client satisfaction scores increase 25%. Advisors serve 30% more clients while maintaining relationship quality. All communications automatically comply with FINRA guidelines."',
+                  keyMetrics: '25% increase in client satisfaction; 30% more clients per advisor; 100% regulatory compliance',
+                  competitiveEdge: 'Proven at Morgan Stanley for enterprise wealth management - combines personalization with institutional compliance'
+                }
+              ]
+            },
+            healthcare: {
+              name: 'Healthcare & Life Sciences',
+              color: 'purple',
+              description: 'Hospitals, Research Institutions, Health Tech',
+              keyConsiderations: [
+                'HIPAA-compliant enterprise deployment options',
+                'Voice and audio for hands-free clinical documentation',
+                'No customer data used in training - patient privacy guaranteed',
+                'Proven accuracy in medical terminology and reasoning'
+              ],
+              useCases: [
+                {
+                  id: 'health-1',
+                  name: 'Clinical Documentation & EHR Efficiency',
+                  shortPitch: 'Reduce physician administrative burden with AI documentation',
+                  problemSolved: 'Physicians spend 2+ hours daily on documentation, leading to burnout and reduced patient interaction time. Manual EHR entry is error-prone and takes away from clinical care.',
+                  howUsed: [
+                    'Generate clinical notes and documentation from voice recordings',
+                    'Summarize patient histories and clinical findings',
+                    'Extract structured data from unstructured medical documents',
+                    'Automate insurance authorization and coding documentation'
+                  ],
+                  whyOpenAI: [
+                    'Voice and audio capabilities enable hands-free documentation',
+                    'HIPAA-compliant enterprise deployment options',
+                    'No customer data used in training - patient privacy guaranteed',
+                    'Proven accuracy in medical terminology and clinical reasoning',
+                    'Integration with major EHR systems (Epic, Cerner)'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Chief Medical Information Officer (CMIO)', level: 'C-Suite', technical: true },
+                    { title: 'VP of Clinical Operations', level: 'VP', technical: false },
+                    { title: 'Healthcare IT Directors', level: 'Director', technical: true }
+                  ],
+                  gtmScenario: '"An academic medical center deploys ChatGPT Enterprise for 500 physicians. Doctors dictate patient encounters, and AI generates structured SOAP notes with ICD-10 coding suggestions. Documentation time drops from 2 hours to 45 minutes daily. Patient face time increases 35%. Chart completion improves from 70% to 95% same-day completion."',
+                  keyMetrics: '60% reduction in documentation time; 35% more patient face time; 95% same-day chart completion',
+                  competitiveEdge: 'Enterprise-grade HIPAA compliance with voice-to-documentation workflow proven in academic medical settings'
+                },
+                {
+                  id: 'health-2',
+                  name: 'Medical Research & Literature Analysis',
+                  shortPitch: 'Accelerate research with AI-powered literature synthesis',
+                  problemSolved: 'Researchers struggle to keep current with exponentially growing medical literature. Literature reviews for grant applications and clinical trials take weeks and may miss critical studies.',
+                  howUsed: [
+                    'Synthesize findings across thousands of medical research papers',
+                    'Identify relevant studies and extract key findings for systematic reviews',
+                    'Generate research summaries and literature review sections',
+                    'Analyze clinical trial data and identify patient-trial matching opportunities'
+                  ],
+                  whyOpenAI: [
+                    'Deep Research mode for comprehensive multi-source medical analysis',
+                    'Reasoning capabilities for complex medical logic and evidence synthesis',
+                    'Handles massive document volumes (thousands of papers)',
+                    'Used in academic medical centers for trial matching',
+                    'Multimodal capabilities analyze medical images and charts'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Research Directors', level: 'VP/Director', technical: true },
+                    { title: 'Principal Investigators', level: 'IC/Director', technical: true },
+                    { title: 'Clinical Trial Coordinators', level: 'Manager', technical: false }
+                  ],
+                  gtmScenario: '"A cancer research institute uses ChatGPT Enterprise for systematic literature reviews and clinical trial enrollment. Researchers analyze 5,000+ oncology papers per quarter to identify treatment patterns. Patient-trial matching accuracy improves 60% through AI analysis of patient records against trial criteria. Grant application literature reviews complete in 3 days vs. 3 weeks."',
+                  keyMetrics: '60% better trial matching; 10x faster literature reviews; 5,000+ papers analyzed per quarter',
+                  competitiveEdge: 'Only AI with extended reasoning capabilities suitable for complex medical evidence synthesis at research-grade quality'
+                },
+                {
+                  id: 'health-3',
+                  name: 'Patient Communication & Education',
+                  shortPitch: 'Improve patient understanding and engagement with AI assistants',
+                  problemSolved: 'Patients struggle to understand complex medical information and treatment options. Staff lack time to answer all patient questions. Health literacy gaps lead to worse outcomes and satisfaction.',
+                  howUsed: [
+                    'Deploy AI chatbots to answer patient questions about conditions and treatments',
+                    'Translate medical jargon into patient-friendly language',
+                    'Provide 24/7 access to health information and appointment scheduling',
+                    'Generate personalized patient education materials'
+                  ],
+                  whyOpenAI: [
+                    'Multilingual support (8+ languages) critical for diverse patient populations',
+                    'Natural language understanding handles varied patient questions',
+                    'Enterprise security protects patient conversations',
+                    'Used by Helvetia Insurance for customer service automation',
+                    'Custom GPTs provide condition-specific guidance'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Chief Experience Officer', level: 'C-Suite', technical: false },
+                    { title: 'Patient Engagement Directors', level: 'VP/Director', technical: false },
+                    { title: 'Healthcare System Administrators', level: 'VP', technical: false }
+                  ],
+                  gtmScenario: '"A hospital system deploys AI patient assistant handling 10,000+ patient inquiries monthly. Patients get instant answers about medications, post-procedure care, and appointment scheduling. Patient satisfaction scores increase 30%. Staff focus on complex cases instead of routine questions. Non-English speaking patients receive support in 8 languages."',
+                  keyMetrics: '10,000+ monthly patient interactions; 30% satisfaction improvement; 8-language support',
+                  competitiveEdge: 'Enterprise-grade healthcare deployment with multilingual support and proven patient safety in major health systems'
+                }
+              ]
+            },
+            enterpriseKnowledge: {
+              name: 'Enterprise Knowledge Work',
+              color: 'green',
+              description: 'Consulting, Legal, HR, Operations',
+              keyConsiderations: [
+                'Native integrations to SharePoint, Google Drive, Confluence',
+                'Custom GPTs encode company-specific expertise',
+                'Unlimited usage enables organization-wide deployment',
+                'Used by BBVA, Estée Lauder, and major enterprises'
+              ],
+              useCases: [
+                {
+                  id: 'ent-1',
+                  name: 'Enterprise Knowledge Management',
+                  shortPitch: 'Unlock institutional knowledge across the organization',
+                  problemSolved: 'Organizations have massive amounts of institutional knowledge trapped in documents, wikis, and systems. Employees waste time searching for information or recreating work that already exists.',
+                  howUsed: [
+                    'Deploy ChatGPT Enterprise with integrations to SharePoint, Google Drive, Confluence',
+                    'Create custom GPTs for department-specific knowledge bases',
+                    'Enable employees to ask questions and get instant answers from company documents',
+                    'Automate knowledge base article creation and updates'
+                  ],
+                  whyOpenAI: [
+                    'Enterprise integrations connect to existing knowledge repositories',
+                    'Custom GPTs encode company-specific expertise and guardrails',
+                    'Unlimited usage enables organization-wide deployment',
+                    'Used by BBVA bank for 11,000 employees saving 3 hours/week each',
+                    'Advanced search across all connected repositories'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Chief Knowledge Officer', level: 'VP/Director', technical: false },
+                    { title: 'Chief Operating Officer', level: 'C-Suite', technical: false },
+                    { title: 'Enterprise IT Directors', level: 'Director', technical: true }
+                  ],
+                  gtmScenario: '"A 5,000-person consulting firm deploys ChatGPT Enterprise with Google Drive and SharePoint integrations. Consultants query 10 years of project documentation to find relevant case studies and methodologies. Custom GPTs for each practice area provide specialized guidance. Employee productivity increases 15%. Knowledge sharing improves measurably as institutional knowledge becomes accessible."',
+                  keyMetrics: '15% productivity improvement; 3 hours/week saved per employee; 100% document repository coverage',
+                  competitiveEdge: 'Only enterprise AI with native integrations to all major knowledge systems plus custom GPT capabilities'
+                },
+                {
+                  id: 'ent-2',
+                  name: 'Professional Services Automation',
+                  shortPitch: 'Automate routine work in consulting, legal, and advisory firms',
+                  problemSolved: 'Professional services firms spend excessive time on non-billable work like proposal generation, contract analysis, and client deliverable creation. Manual processes limit scalability and profitability.',
+                  howUsed: [
+                    'Generate client proposals, RFP responses, and pitch materials',
+                    'Analyze contracts and legal documents for key terms and risks',
+                    'Create client-ready reports and executive summaries',
+                    'Automate monthly close processes and financial reporting'
+                  ],
+                  whyOpenAI: [
+                    'Reasoning models handle complex multi-step professional work',
+                    'Enterprise security protects sensitive client information',
+                    'Data analysis capabilities process financial and operational data',
+                    'Estée Lauder uses custom GPT lab for brand-specific use cases',
+                    'Document analysis matches attorney-grade quality'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Managing Partners', level: 'C-Suite', technical: false },
+                    { title: 'Operations Directors', level: 'VP/Director', technical: false },
+                    { title: 'Practice Area Leads', level: 'Director/Manager', technical: false }
+                  ],
+                  gtmScenario: '"A mid-size law firm uses ChatGPT Enterprise for contract analysis and due diligence. Attorneys analyze M&A contracts in 2 hours vs. 8 hours manually. Proposal response time drops 60%. Junior associates focus on strategic work instead of document review. Firm increases billable utilization from 65% to 78% while maintaining quality."',
+                  keyMetrics: '75% faster contract analysis; 60% faster proposal generation; 13% billable utilization improvement',
+                  competitiveEdge: 'Extended reasoning capabilities enable attorney-grade document analysis while maintaining security for privileged information'
+                },
+                {
+                  id: 'ent-3',
+                  name: 'HR & Talent Operations',
+                  shortPitch: 'Transform HR processes with AI-powered automation',
+                  problemSolved: 'HR teams manage overwhelming candidate volumes, repetitive employee questions, and time-consuming administrative processes. Manual workflows limit ability to provide strategic HR support.',
+                  howUsed: [
+                    'Automate candidate screening and interview summaries',
+                    'Deploy HR chatbots to answer employee policy and benefits questions',
+                    'Generate job descriptions and recruitment marketing content',
+                    'Analyze employee feedback and engagement survey data'
+                  ],
+                  whyOpenAI: [
+                    'Natural language processing handles varied employee questions',
+                    'Data analysis identifies trends in employee feedback',
+                    'Enterprise security protects employee personal information',
+                    'Custom GPTs can encode company-specific HR policies',
+                    'Multilingual support for global workforce'
+                  ],
+                  buyerPersonas: [
+                    { title: 'Chief People Officer', level: 'C-Suite', technical: false },
+                    { title: 'HR Operations Directors', level: 'VP/Director', technical: false },
+                    { title: 'Talent Acquisition Leads', level: 'Director/Manager', technical: false }
+                  ],
+                  gtmScenario: '"A tech company with 3,000 employees deploys ChatGPT Enterprise for HR operations. AI handles 70% of routine employee questions about benefits, PTO, and policies. Recruiters use it to screen 500+ applications monthly and generate interview guides. HR team capacity increases 40% while improving employee satisfaction with 24/7 support availability."',
+                  keyMetrics: '70% employee question automation; 40% HR capacity increase; 24/7 employee support availability',
+                  competitiveEdge: 'Enterprise deployment at companies like BBVA proves scalability for large employee bases with guaranteed privacy compliance'
+                }
+              ]
+            }
+          };
+
+          const searchResults = useMemo(() => {
+            if (!searchTerm) return null;
+            
+            const results = [];
+            Object.entries(gtmData).forEach(([industryKey, industry]) => {
+              industry.useCases.forEach(useCase => {
+                const searchLower = searchTerm.toLowerCase();
+                if (
+                  useCase.name.toLowerCase().includes(searchLower) ||
+                  useCase.shortPitch.toLowerCase().includes(searchLower) ||
+                  useCase.problemSolved.toLowerCase().includes(searchLower) ||
+                  useCase.buyerPersonas.some(p => p.title.toLowerCase().includes(searchLower))
+                ) {
+                  results.push({ ...useCase, industry: industry.name, industryKey });
+                }
+              });
+            });
+            return results;
+          }, [searchTerm]);
+
+          const copyToClipboard = (text, id) => {
+            navigator.clipboard.writeText(text);
+            setCopiedText(id);
+            setTimeout(() => setCopiedText(null), 2000);
+          };
+
+          const getColorClasses = (color) => {
+            const colors = {
+              cyan: {
+                bg: 'bg-cyan-900/20',
+                border: 'border-cyan-400',
+                text: 'text-cyan-400',
+                hover: 'hover:bg-cyan-900/30',
+                gradient: 'from-cyan-900 to-cyan-800'
+              },
+              blue: {
+                bg: 'bg-blue-900/20',
+                border: 'border-blue-400',
+                text: 'text-blue-400',
+                hover: 'hover:bg-blue-900/30',
+                gradient: 'from-blue-900 to-blue-800'
+              },
+              purple: {
+                bg: 'bg-purple-900/20',
+                border: 'border-purple-400',
+                text: 'text-purple-400',
+                hover: 'hover:bg-purple-900/30',
+                gradient: 'from-purple-900 to-purple-800'
+              },
+              green: {
+                bg: 'bg-emerald-900/20',
+                border: 'border-emerald-400',
+                text: 'text-emerald-400',
+                hover: 'hover:bg-emerald-900/30',
+                gradient: 'from-emerald-900 to-emerald-800'
+              }
+            };
+            return colors[color] || colors.cyan;
+          };
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+              {/* Header */}
+              <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800 shadow-lg">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                  <div className="mb-4">
+                    <div>
+                      <h1 className="text-3xl font-bold text-white mb-1">
+                        OpenAI CCO Tech Strategy
+                      </h1>
+                      <p className="text-slate-400">
+                        Enterprise AI Solutions Across Key Verticals
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search use cases, buyer personas, industries..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all text-white placeholder-slate-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Search Results */}
+              {searchResults && searchResults.length > 0 && (
+                <div className="max-w-7xl mx-auto px-6 py-6">
+                  <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold mb-3 text-slate-200">
+                      Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                    </h3>
+                    <div className="space-y-2">
+                      {searchResults.map(result => (
+                        <button
+                          key={result.id}
+                          onClick={() => {
+                            setSelectedIndustry(result.industryKey);
+                            setExpandedUseCase(result.id);
+                            setSearchTerm('');
+                          }}
+                          className="w-full text-left p-3 bg-slate-800/50 hover:bg-slate-800 rounded-lg border border-slate-700 transition-colors"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-medium text-white">{result.name}</div>
+                              <div className="text-sm text-slate-400 mt-1">{result.industry} • {result.shortPitch}</div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Main Content - INDUSTRIES FIRST */}
+              <div className="max-w-7xl mx-auto px-6 py-8">
+                {/* Industry Categories */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  {Object.entries(gtmData).map(([key, industry]) => {
+                    const colors = getColorClasses(industry.color);
+                    const isSelected = selectedIndustry === key;
+                    
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setSelectedIndustry(isSelected ? null : key)}
+                        className={`text-left p-6 rounded-xl border-2 transition-all ${
+                          isSelected 
+                            ? `${colors.border} bg-gradient-to-br ${colors.gradient}` 
+                            : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          {isSelected ? (
+                            <ChevronDown className="w-6 h-6 text-white" />
+                          ) : (
+                            <ChevronRight className="w-6 h-6 text-slate-400" />
+                          )}
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">{industry.name}</h3>
+                        <p className="text-sm text-slate-400 mb-4">{industry.description}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Selected Industry Details */}
+                {selectedIndustry && (
+                  <div className="space-y-6 mb-12">
+                    {/* Key Considerations */}
+                    <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Shield className="w-5 h-5 text-cyan-400" />
+                        <h3 className="text-lg font-semibold text-white">
+                          Key Value Drivers for {gtmData[selectedIndustry].name}
+                        </h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {gtmData[selectedIndustry].keyConsiderations.map((consideration, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-slate-300">{consideration}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Use Cases */}
+                    <div className="space-y-4">
+                      {gtmData[selectedIndustry].useCases.map((useCase) => {
+                        const isExpanded = expandedUseCase === useCase.id;
+                        const colors = getColorClasses(gtmData[selectedIndustry].color);
+
+                        return (
+                          <div
+                            key={useCase.id}
+                            className="bg-slate-900/50 border border-slate-800 rounded-lg overflow-hidden"
+                          >
+                            {/* Use Case Header */}
+                            <button
+                              onClick={() => setExpandedUseCase(isExpanded ? null : useCase.id)}
+                              className="w-full p-6 text-left hover:bg-slate-800/30 transition-colors"
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <h4 className="text-xl font-semibold text-white">{useCase.name}</h4>
+                                    <span className={`px-2 py-0.5 text-xs ${colors.bg} ${colors.text} rounded`}>
+                                      {useCase.id}
+                                    </span>
+                                  </div>
+                                  <p className={`text-sm ${colors.text} mb-3 font-medium`}>
+                                    {useCase.shortPitch}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {useCase.buyerPersonas.slice(0, 3).map((persona, idx) => (
+                                      <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-slate-800 rounded text-xs text-slate-300">
+                                        <Users className="w-3 h-3" />
+                                        {persona.title}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                {isExpanded ? (
+                                  <ChevronDown className="w-6 h-6 text-slate-400 flex-shrink-0 ml-4" />
+                                ) : (
+                                  <ChevronRight className="w-6 h-6 text-slate-400 flex-shrink-0 ml-4" />
+                                )}
+                              </div>
+                            </button>
+
+                            {/* Expanded Content */}
+                            {isExpanded && (
+                              <div className="border-t border-slate-800 p-6 space-y-6">
+                                {/* Problem Being Solved */}
+                                <div>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Target className="w-5 h-5 text-red-400" />
+                                    <h5 className="font-semibold text-white">Problem Being Solved</h5>
+                                  </div>
+                                  <p className="text-slate-300 leading-relaxed">{useCase.problemSolved}</p>
+                                </div>
+
+                                {/* How OpenAI is Used */}
+                                <div>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Code className="w-5 h-5 text-cyan-400" />
+                                    <h5 className="font-semibold text-white">How OpenAI is Used</h5>
+                                  </div>
+                                  <ul className="space-y-2">
+                                    {useCase.howUsed.map((item, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
+                                        <span className="text-slate-300">{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                {/* Why OpenAI */}
+                                <div>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Lightbulb className="w-5 h-5 text-yellow-400" />
+                                    <h5 className="font-semibold text-white">Why OpenAI</h5>
+                                  </div>
+                                  <ul className="space-y-2">
+                                    {useCase.whyOpenAI.map((item, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                                        <span className="text-slate-300">{item}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                {/* Buyer Personas */}
+                                <div>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <Users className="w-5 h-5 text-purple-400" />
+                                    <h5 className="font-semibold text-white">Example Buyer Personas</h5>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    {useCase.buyerPersonas.map((persona, idx) => (
+                                      <div key={idx} className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                                        <div className="font-medium text-white text-sm mb-1">{persona.title}</div>
+                                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                                          <span>{persona.level}</span>
+                                          {persona.technical && (
+                                            <span className="px-1.5 py-0.5 bg-slate-700 rounded">Technical</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* GTM Scenario */}
+                                <div className="bg-gradient-to-r from-cyan-900/20 to-cyan-800/20 border border-cyan-500/30 rounded-lg p-4">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-2 h-2 rounded-full bg-cyan-400" />
+                                      <h5 className="font-semibold text-cyan-400 text-sm">Example Scenario</h5>
+                                    </div>
+                                    <button
+                                      onClick={() => copyToClipboard(useCase.gtmScenario, useCase.id)}
+                                      className="p-1 hover:bg-cyan-900/30 rounded transition-colors"
+                                    >
+                                      {copiedText === useCase.id ? (
+                                        <Check className="w-4 h-4 text-green-400" />
+                                      ) : (
+                                        <Copy className="w-4 h-4 text-cyan-400" />
+                                      )}
+                                    </button>
+                                  </div>
+                                  <p className="text-slate-200 leading-relaxed italic">{useCase.gtmScenario}</p>
+                                </div>
+
+                                {/* Key Metrics & Competitive Edge */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="p-4 bg-green-900/10 border border-green-500/30 rounded-lg">
+                                    <div className="text-xs text-green-400 font-medium mb-1">Key Metrics</div>
+                                    <div className="text-sm text-slate-200">{useCase.keyMetrics}</div>
+                                  </div>
+                                  <div className="p-4 bg-cyan-900/10 border border-cyan-500/30 rounded-lg">
+                                    <div className="text-xs text-cyan-400 font-medium mb-1">Competitive Edge</div>
+                                    <div className="text-sm text-slate-200">{useCase.competitiveEdge}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty State - Between Industries and Market Updates */}
+                {!selectedIndustry && (
+                  <div className="text-center py-12 mb-12">
+                    <div className="text-slate-400 text-lg mb-2">Select an industry to view use cases</div>
+                    <p className="text-slate-500">Click on any category to explore OpenAI enterprise solutions</p>
+                  </div>
+                )}
+
+                {/* MARKET UPDATES */}
+                <div className="mb-8 pt-8 border-t border-slate-800">
+                  {/* Section Header */}
+                  <div className="mb-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                      <h2 className="text-2xl font-bold text-white">Market Updates</h2>
+                      <div className="px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/30 rounded text-xs text-cyan-400 font-medium">
+                        Live Intelligence
+                      </div>
+                    </div>
+                    <p className="text-slate-400 text-sm">
+                      Key developments shaping the AI landscape
+                    </p>
+                  </div>
+
+                  {/* Intelligence Grid - No Categories */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    
+                    {/* Card 1 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              OpenAI begins testing ads in ChatGPT for free and Go-tier users
+                            </h4>
+                            <a 
+                              href="https://www.cnbc.com/2026/01/16/open-ai-chatgpt-ads-us.html" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            New revenue stream to support $1.4 trillion AI infrastructure commitments while maintaining ad-free experience for Plus, Pro, and Enterprise customers
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 2 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              OpenAI launches ChatGPT for Healthcare with HIPAA-compliant deployment
+                            </h4>
+                            <a 
+                              href="https://openai.com/index/openai-for-healthcare/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            Major healthcare institutions including HCA, Memorial Sloan Kettering, and UCSF now deploying with BAA support and data residency controls
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 3 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              230 million users ask health questions on ChatGPT weekly
+                            </h4>
+                            <a 
+                              href="https://www.axios.com/2026/01/05/chatgpt-openai-health-insurance-aca" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            Over 5% of all ChatGPT messages globally relate to healthcare, signaling massive consumer demand for health-focused AI applications
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 4 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              ChatGPT market share drops from 87% to 68% as Gemini surges to 18%
+                            </h4>
+                            <a 
+                              href="https://vertu.com/lifestyle/ai-chatbot-market-share-2026-chatgpt-drops-to-68-as-google-gemini-surges-to-18-2/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            Google's ecosystem integration driving 237% YoY growth in Gemini adoption, while ChatGPT maintains 800M weekly active users
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 5 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              Anthropic's Claude Code gains developer momentum after Google engineer endorsement
+                            </h4>
+                            <a 
+                              href="https://ppc.land/google-engineers-claude-code-confession-rattles-engineering-teams/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            Google Gemini API engineer praised Claude Code for reproducing year-long project in one hour, intensifying coding assistant competition
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 6 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              Anthropic launches Claude Cowork targeting enterprise knowledge workers
+                            </h4>
+                            <a 
+                              href="https://www.ainewshub.org/post/anthropic-releases-claude-cowork-is-claude-winning-the-enterprise-ai-race" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            Autonomous workspace assistant extends beyond coding into finance, HR, and operations workflows, directly competing with ChatGPT Enterprise
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 7 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              OpenAI unifies engineering teams for audio-first AI device launch in 2027
+                            </h4>
+                            <a 
+                              href="https://techcrunch.com/2026/01/01/openai-bets-big-on-audio-as-silicon-valley-declares-war-on-screens/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            Audio model overhaul in preparation for consumer hardware device with Jony Ive collaboration, reflecting industry shift toward screenless AI interfaces
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 8 */}
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/30 border border-slate-700/50 rounded-lg p-5 hover:border-slate-600 transition-all">
+                      <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="text-white font-medium text-sm leading-tight flex-1">
+                              OpenAI releases GPT-5.2 with improvements in technical writing and translation
+                            </h4>
+                            <a 
+                              href="https://help.openai.com/en/articles/6825453-chatgpt-release-notes" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex-shrink-0 text-cyan-400 hover:text-cyan-300 transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                          <p className="text-slate-400 text-xs leading-relaxed">
+                            Latest model upgrade delivers enhanced info-seeking, how-tos, and conversational tone while maintaining enterprise reliability
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        ReactDOM.render(<OpenAICCODashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
